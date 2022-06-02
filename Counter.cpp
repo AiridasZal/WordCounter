@@ -8,7 +8,7 @@
 #include <sstream>
 #include <algorithm>
 
-void counter(std::string fname, std::map<std::string, std::vector<int>> &word_map) {
+void counter(std::string fname, std::map<std::string, std::vector<int>> &word_map, std::vector<std::string> &url) {
     std::istringstream iss;
     std::string line;
     std::string word;
@@ -29,6 +29,10 @@ void counter(std::string fname, std::map<std::string, std::vector<int>> &word_ma
         line_num++;
 
         while (iss >> word) {
+                // Find URLs and store them in url vector
+                if (word.find("http") != std::string::npos || word.find("www") != std::string::npos) {
+                    url.push_back(word);
+                }
                 if (word != "") {   
                     // Convert all words to lowercase and do not include numbers, symbols and spaces
                     std::transform(word.begin(), word.end(), word.begin(), ::tolower);
@@ -46,15 +50,16 @@ void counter(std::string fname, std::map<std::string, std::vector<int>> &word_ma
     }
     in.close();
 }
-void output(std::string outfile, std::map<std::string, std::vector<int>> &word_map)
+void output(std::string outfile, std::map<std::string, std::vector<int>> word_map, std::vector<std::string> url)
 {
+    // Header for the word map.
     std::ofstream out(outfile);
     for(int i=0; i<70; i++)  out << "*";
     out << "\n|       " << std::left << std::setw(10) << "Word" << "|     " << std::left << std::setw(10) << "Count" << "|     " << std::left << std::setw(30) << "Lines in which it appears" << "|" << std::endl;
     for(int i=0; i<70; i++) out << "*";
     out << std::endl;
 
-    //output results from word_map where the word was repeated more than once and line_map
+    // Output from word map where the word has appeared more than once
     for (auto it = word_map.begin(); it != word_map.end(); ++it) {
         if (it->second.size() > 1) {
             out << "|" << std::left << std::setw(15) << it->first << "|     " << std::left << std::setw(10) << it->second.size() << "|     ";
@@ -68,6 +73,15 @@ void output(std::string outfile, std::map<std::string, std::vector<int>> &word_m
         }
     }
 
+    // Second header but instead of words it's for urls
+    for(int i=0; i<18; i++) out << "*";
+    out << "\n|       " << std::left << std::setw(10) << "URL" << "| " << std::endl;
+    for(int i=0; i<18; i++) out << "*";
+    out << std::endl;
+    // Output from url vector
+    for (int i = 0; i < url.size(); i++) {
+        out << url[i] << std::endl;
+    }
     out.close();
 
 }
@@ -78,9 +92,10 @@ int main()
     std::string outfile="Rezultatai.txt";
     
     std::map<std::string, std::vector<int>> word_map;
+    std::vector<std::string> url;
 
-    counter(fname, word_map);
-    output(outfile, word_map);
+    counter(fname, word_map, url);
+    output(outfile, word_map, url);
     
     
     return 0;
