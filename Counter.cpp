@@ -73,6 +73,9 @@ void counter(std::string file_name, std::map<std::string, std::vector<int>> &wor
             }
         }
     }
+    //Remove duplicate links from url vector
+    std::sort(url.begin(), url.end());
+    url.erase(std::unique(url.begin(), url.end()), url.end());
     in.close();
     std::cout << "File successfully read." << std::endl;
 }
@@ -98,15 +101,19 @@ void output(std::string outfile, std::map<std::string, std::vector<int>> word_ma
             out << std::endl;
         }
     }
-
     // Second header but instead of words it's for urls
     for(int i=0; i<18; i++) out << "*";
     out << "\n|       " << std::left << std::setw(10) << "URL" << "| " << std::endl;
     for(int i=0; i<18; i++) out << "*";
     out << std::endl;
-    // Output from url vector
+    // Output from url vector, if there are brackets surrounding the url, output without them
     for (int i = 0; i < url.size(); i++) {
-        out << url[i] << std::endl;
+        if (url[i].find("(") != std::string::npos) {
+            out  << url[i].substr(url[i].find("(") + 1, url[i].find(")") - url[i].find("(") - 1) << std::endl;
+        }
+        else {
+            out  << url[i]<< std::endl;
+        }
     }
     out.close();
     std::cout << "Results have been outputted to: " << outfile << std::endl;
